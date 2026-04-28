@@ -16,9 +16,9 @@ os.makedirs("downloads", exist_ok=True)
 
 def main_menu():
     builder = InlineKeyboardBuilder()
-    builder.button(text="🎥 Скачать видео", callback_data="main_menu")
-    builder.button(text="🎵 Найти музыку", callback_data="shazam")
-    builder.button(text="❤️ Поддержать разработчика", callback_data="donate")
+    builder.button(text="🎥 Скачать видео", callback_data="menu_download")
+    builder.button(text="🎵 Найти музыку", callback_data="menu_shazam")
+    builder.button(text="❤️ Поддержать разработчика", callback_data="menu_donate")
     builder.adjust(1)
     return builder.as_markup()
 
@@ -26,8 +26,7 @@ def main_menu():
 @dp.message(Command("start"))
 async def start(message: types.Message):
     await message.answer(
-        "🎥 Бот готов к работе!\n\n"
-        "Выбери действие:",
+        "🎥 Бот готов!\n\nВыбери действие:",
         reply_markup=main_menu()
     )
 
@@ -66,32 +65,28 @@ async def download(message: types.Message):
         await wait.edit_text("❌ Не удалось скачать.\nПопробуй другую ссылку.")
 
 
-# ==================== КНОПКИ ====================
+# ==================== МЕНЮ ====================
 
-@dp.callback_query(F.data == "main_menu")
+@dp.callback_query(F.data == "menu_download")
 async def back_to_menu(callback: types.CallbackQuery):
+    await callback.message.edit_text("🎥 Отправь мне ссылку на видео.", reply_markup=main_menu())
+
+
+@dp.callback_query(F.data == "menu_shazam")
+async def shazam_menu(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        "🎥 Главное меню\nВыбери действие:",
+        "🎵 Отправь видео или ссылку — попробую найти музыку.",
         reply_markup=main_menu()
     )
 
 
-@dp.callback_query(F.data == "shazam")
-async def shazam_mode(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        "🎵 Отправь мне видео или ссылку — попробую найти трек.\n\n"
-        "Для возврата в меню нажми кнопку ниже.",
-        reply_markup=main_menu()
-    )
-
-
-@dp.callback_query(F.data == "donate")
-async def donate(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "menu_donate")
+async def donate_menu(callback: types.CallbackQuery):
     builder = InlineKeyboardBuilder()
-    builder.button(text="⬅️ Назад в меню", callback_data="main_menu")
+    builder.button(text="⬅️ Назад в меню", callback_data="menu_download")
     
     await callback.message.edit_text(
-        "❤️ Спасибо, что хочешь поддержать разработчика!\n\n"
+        "❤️ Спасибо за поддержку!\n\n"
         "Ссылка для доната:\n"
         "https://www.tbank.ru/cf/aTPfX0LC3j",
         reply_markup=builder.as_markup(),
@@ -100,7 +95,7 @@ async def donate(callback: types.CallbackQuery):
 
 
 async def main():
-    print("🤖 Бот запущен с удобным меню")
+    print("🤖 Бот с исправленной навигацией запущен")
     await dp.start_polling(bot)
 
 
