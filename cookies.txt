@@ -1,1 +1,9 @@
+# Netscape HTTP Cookie File
+# https://www.instagram.com
 
+.instagram.com	FALSE	/	FALSE	0	csrftoken	xsspNXL6AvbH36KvhgrBUf
+.instagram.com	FALSE	/	FALSE	0	ds_user_id	60855503882
+.instagram.com	FALSE	/	FALSE	0	mid	afC zwwAAAAEGIfDSZ1U1TKUCKn88
+.instagram.com	FALSE	/	FALSE	0	wd	430x729
+.instagram.com	FALSE	/	FALSE	0	dpr	3
+.instagram.com	FALSE	/	FALSE	0	ig_nr_cb	1
