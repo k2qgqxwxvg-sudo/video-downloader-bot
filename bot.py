@@ -5,7 +5,6 @@ import asyncio
 import yt_dlp
 import os
 
-# ================= НАСТРОЙКИ =================
 BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
 
 bot = Bot(token=BOT_TOKEN)
@@ -17,19 +16,18 @@ os.makedirs("downloads", exist_ok=True)
 @dp.message(Command("start"))
 async def start(message: types.Message):
     await message.answer(
-        "🎥 Привет! Отправь ссылку на видео из TikTok, YouTube или Instagram — "
-        "скачаю без водяных знаков."
+        "🎥 Бот с cookies (Instagram должен работать лучше).\n"
+        "Просто кидай ссылку."
     )
 
 
 @dp.message(F.text)
 async def download(message: types.Message):
     url = message.text.strip()
-    
-    if not url.startswith(("http://", "https://")):
+    if not url.startswith(("http", "https")):
         return await message.answer("❌ Это не ссылка.")
 
-    wait_msg = await message.answer("⏳ Скачиваю... (может занять 10–25 секунд)")
+    wait_msg = await message.answer("⏳ Скачиваю с cookies...")
 
     try:
         ydl_opts = {
@@ -37,22 +35,9 @@ async def download(message: types.Message):
             'format': 'bestvideo+bestaudio/best',
             'noplaylist': True,
             'quiet': True,
-            'no_warnings': True,
-            
-            # Максимально усиленные настройки 2026
+            'cookiefile': 'cookies.txt',          # ← Куки подключены
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Referer': 'https://www.instagram.com/',
-            },
-            'extractor_args': {
-                'instagram': {
-                    'player_url': True,
-                    'graphql': True,
-                },
-                'tiktok': {
-                    'webpage': True,
-                },
             },
         }
 
@@ -63,21 +48,20 @@ async def download(message: types.Message):
         with open(filename, 'rb') as video:
             await message.answer_video(
                 types.InputFile(video),
-                caption=f"✅ Готово!\n🔗 {url}"
+                caption=f"✅ Готово!\n{url}"
             )
 
         os.remove(filename)
 
     except Exception:
         await wait_msg.edit_text(
-            "❌ Не удалось скачать это видео.\n"
-            "Instagram очень часто блокирует. Попробуй отправить ссылку ещё раз или другую."
+            "❌ Не удалось скачать даже с cookies.\n"
+            "Попробуй другую ссылку или обнови cookies."
         )
 
 
-# ================= ЗАПУСК =================
 async def main():
-    print("🤖 Бот запущен и работает 24/7")
+    print("🤖 Бот с cookies запущен")
     await dp.start_polling(bot)
 
 
