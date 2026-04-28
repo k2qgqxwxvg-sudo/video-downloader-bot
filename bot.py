@@ -15,7 +15,7 @@ os.makedirs("downloads", exist_ok=True)
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer("🎥 Простой бот.\nОтправь ссылку на TikTok или YouTube.")
+    await message.answer("🎥 Бот исправлен.\nКидай ссылку на TikTok или YouTube.")
 
 
 @dp.message(F.text)
@@ -38,20 +38,23 @@ async def download(message: types.Message):
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
 
+        # Правильный способ отправки видео в aiogram 3
         with open(filename, 'rb') as f:
-            await message.answer_video(
-                types.InputFile(f),
-                caption=f"✅ Готово!\n{url}"
-            )
+            video_bytes = f.read()
+
+        await message.answer_video(
+            types.BufferedInputFile(video_bytes, filename=filename),
+            caption=f"✅ Готово!\n{url}"
+        )
 
         os.remove(filename)
 
     except Exception as e:
-        await wait.edit_text(f"❌ Ошибка: {str(e)[:200]}...\nПопробуй другую ссылку.")
+        await wait.edit_text(f"❌ Ошибка: {str(e)[:150]}...\nПопробуй другую ссылку.")
 
 
 async def main():
-    print("🤖 Бот запущен")
+    print("🤖 Бот запущен (исправленная версия)")
     await dp.start_polling(bot)
 
 
