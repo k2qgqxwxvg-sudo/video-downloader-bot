@@ -14,17 +14,21 @@ dp = Dispatcher()
 os.makedirs("downloads", exist_ok=True)
 
 
-@dp.message(Command("start"))
-async def start(message: types.Message):
+def main_menu():
     builder = InlineKeyboardBuilder()
+    builder.button(text="🎥 Скачать видео", callback_data="main_menu")
     builder.button(text="🎵 Найти музыку", callback_data="shazam")
     builder.button(text="❤️ Поддержать разработчика", callback_data="donate")
     builder.adjust(1)
+    return builder.as_markup()
 
+
+@dp.message(Command("start"))
+async def start(message: types.Message):
     await message.answer(
-        "🎥 Бот готов!\n\n"
-        "Отправь ссылку на видео из TikTok, YouTube или Instagram.",
-        reply_markup=builder.as_markup()
+        "🎥 Бот готов к работе!\n\n"
+        "Выбери действие:",
+        reply_markup=main_menu()
     )
 
 
@@ -59,26 +63,44 @@ async def download(message: types.Message):
         os.remove(filename)
 
     except Exception:
-        await wait.edit_text("❌ Не удалось скачать видео.\nПопробуй другую ссылку.")
+        await wait.edit_text("❌ Не удалось скачать.\nПопробуй другую ссылку.")
+
+
+# ==================== КНОПКИ ====================
+
+@dp.callback_query(F.data == "main_menu")
+async def back_to_menu(callback: types.CallbackQuery):
+    await callback.message.edit_text(
+        "🎥 Главное меню\nВыбери действие:",
+        reply_markup=main_menu()
+    )
 
 
 @dp.callback_query(F.data == "shazam")
 async def shazam_mode(callback: types.CallbackQuery):
-    await callback.message.edit_text("🎵 Отправь видео или ссылку — попробую найти трек.")
+    await callback.message.edit_text(
+        "🎵 Отправь мне видео или ссылку — попробую найти трек.\n\n"
+        "Для возврата в меню нажми кнопку ниже.",
+        reply_markup=main_menu()
+    )
 
 
 @dp.callback_query(F.data == "donate")
 async def donate(callback: types.CallbackQuery):
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⬅️ Назад в меню", callback_data="main_menu")
+    
     await callback.message.edit_text(
-        "❤️ Спасибо!\n\n"
-        "Ссылка для поддержки:\n"
+        "❤️ Спасибо, что хочешь поддержать разработчика!\n\n"
+        "Ссылка для доната:\n"
         "https://www.tbank.ru/cf/aTPfX0LC3j",
+        reply_markup=builder.as_markup(),
         disable_web_page_preview=True
     )
 
 
 async def main():
-    print("🤖 Бот запущен")
+    print("🤖 Бот запущен с удобным меню")
     await dp.start_polling(bot)
 
 
