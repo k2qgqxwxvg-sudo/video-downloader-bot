@@ -5,8 +5,7 @@ import asyncio
 import yt_dlp
 import os
 
-BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM
-"
+BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
