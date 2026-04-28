@@ -3,8 +3,6 @@ from aiogram.filters import Command
 from aiogram import F
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import asyncio
-import os
-import json
 
 BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
 
@@ -30,7 +28,8 @@ async def start(message: types.Message):
 
     await message.answer(
         f"🪙 **Gem Hunter**\n\n"
-        f"Баланс: **{user_balance[user_id]:,}** монет",
+        f"Баланс: **{user_balance[user_id]:,}** монет\n\n"
+        "Готов искать сокровища?",
         reply_markup=get_main_keyboard()
     )
 
@@ -38,11 +37,11 @@ async def start(message: types.Message):
 @dp.message(F.text == "🪙 Играть в Gem Hunter")
 async def play_game(message: types.Message):
     await message.answer(
-        "🎮 Запускаем Gem Hunter...",
+        "🎮 Открываем Gem Hunter...",
         reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[[
             types.InlineKeyboardButton(
-                text="▶️ Открыть игру",
-                web_app=types.WebAppInfo(url="https://твой-домен.railway.app")  # ← свой URL
+                text="▶️ Запустить игру",
+                web_app=types.WebAppInfo(url="https://твой-url.railway.app")  # ← замени на свой
             )
         ]])
     )
@@ -51,27 +50,7 @@ async def play_game(message: types.Message):
 @dp.message(F.text == "💰 Мой баланс")
 async def show_balance(message: types.Message):
     bal = user_balance.get(message.from_user.id, 10000)
-    await message.answer(f"💰 Твой баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
-
-
-# Получаем данные из WebApp
-@dp.message(F.web_app_data)
-async def web_app_data(message: types.Message):
-    try:
-        data = json.loads(message.web_app_data.data)
-        user_id = message.from_user.id
-        
-        if data.get('action') == 'win':
-            win_amount = int(data.get('amount', 0))
-            user_balance[user_id] = user_balance.get(user_id, 10000) + win_amount
-            
-            await message.answer(
-                f"💰 Выигрыш зачислен!\n"
-                f"+{win_amount:,} монет\n\n"
-                f"Новый баланс: **{user_balance[user_id]:,}** монет"
-            )
-    except:
-        pass
+    await message.answer(f"💰 Баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
 
 
 async def main():
