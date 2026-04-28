@@ -23,8 +23,7 @@ async def start(message: types.Message):
 
     await message.answer(
         "🎥 Бот готов!\n\n"
-        "Отправь ссылку на видео из TikTok, YouTube или Instagram.\n"
-        "Или используй кнопки:",
+        "Отправь ссылку на видео из TikTok, YouTube или Instagram.",
         reply_markup=builder.as_markup()
     )
 
@@ -46,4 +45,42 @@ async def download(message: types.Message):
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info
+            info = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info)
+
+        with open(filename, 'rb') as f:
+            video_bytes = f.read()
+
+        await message.answer_video(
+            types.BufferedInputFile(video_bytes, filename=filename),
+            caption=f"✅ Готово!\n{url}"
+        )
+
+        os.remove(filename)
+
+    except Exception:
+        await wait.edit_text("❌ Не удалось скачать видео.\nПопробуй другую ссылку.")
+
+
+@dp.callback_query(F.data == "shazam")
+async def shazam_mode(callback: types.CallbackQuery):
+    await callback.message.edit_text("🎵 Отправь видео или ссылку — попробую найти трек.")
+
+
+@dp.callback_query(F.data == "donate")
+async def donate(callback: types.CallbackQuery):
+    await callback.message.edit_text(
+        "❤️ Спасибо!\n\n"
+        "Ссылка для поддержки:\n"
+        "https://www.tbank.ru/cf/aTPfX0LC3j",
+        disable_web_page_preview=True
+    )
+
+
+async def main():
+    print("🤖 Бот запущен")
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
