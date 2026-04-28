@@ -15,10 +15,7 @@ os.makedirs("downloads", exist_ok=True)
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer(
-        "🎥 Бот с cookies (Instagram должен работать лучше).\n"
-        "Просто кидай ссылку."
-    )
+    await message.answer("🎥 Бот готов.\nTikTok + Instagram\nКидай ссылку.")
 
 
 @dp.message(F.text)
@@ -27,7 +24,7 @@ async def download(message: types.Message):
     if not url.startswith(("http", "https")):
         return await message.answer("❌ Это не ссылка.")
 
-    wait_msg = await message.answer("⏳ Скачиваю с cookies...")
+    wait_msg = await message.answer("⏳ Скачиваю...")
 
     try:
         ydl_opts = {
@@ -35,10 +32,12 @@ async def download(message: types.Message):
             'format': 'bestvideo+bestaudio/best',
             'noplaylist': True,
             'quiet': True,
-            'cookiefile': 'cookies.txt',          # ← Куки подключены
+            'cookiefile': 'cookies.txt',   # если есть — используем
             'http_headers': {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
             },
+            'retries': 15,
+            'fragment_retries': 10,
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -54,14 +53,11 @@ async def download(message: types.Message):
         os.remove(filename)
 
     except Exception:
-        await wait_msg.edit_text(
-            "❌ Не удалось скачать даже с cookies.\n"
-            "Попробуй другую ссылку или обнови cookies."
-        )
+        await wait_msg.edit_text("❌ Не скачалось.\nПопробуй другую ссылку.")
 
 
 async def main():
-    print("🤖 Бот с cookies запущен")
+    print("🤖 Бот запущен")
     await dp.start_polling(bot)
 
 
