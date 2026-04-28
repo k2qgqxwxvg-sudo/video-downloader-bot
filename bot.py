@@ -46,8 +46,8 @@ async def download(message: types.Message):
         await msg.edit_text(f"❌ Не удалось скачать.\nПопробуй другую ссылку.")
 
 async def main():
-    print("Бот запущен и работает 24/7")
+    print("🤖 Бот запущен и работает 24/7")
     await dp.start_polling(bot)
 
-if name == "__main__":
+if __name__ == "__main__":      # ← Правильно так
     asyncio.run(main())
