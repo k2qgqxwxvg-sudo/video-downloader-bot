@@ -14,21 +14,18 @@ dp = Dispatcher()
 os.makedirs("downloads", exist_ok=True)
 
 
-def main_menu():
+def get_main_menu():
     builder = InlineKeyboardBuilder()
-    builder.button(text="🎥 Скачать видео", callback_data="menu_download")
-    builder.button(text="🎵 Найти музыку", callback_data="menu_shazam")
-    builder.button(text="❤️ Поддержать разработчика", callback_data="menu_donate")
+    builder.button(text="🎥 Скачать видео", callback_data="main")
+    builder.button(text="🎵 Найти музыку", callback_data="shazam")
+    builder.button(text="❤️ Поддержать", callback_data="donate")
     builder.adjust(1)
     return builder.as_markup()
 
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer(
-        "🎥 Бот готов!\n\nВыбери действие:",
-        reply_markup=main_menu()
-    )
+    await message.answer("🎥 Бот готов!\nВыбери действие ниже:", reply_markup=get_main_menu())
 
 
 @dp.message(F.text)
@@ -58,32 +55,31 @@ async def download(message: types.Message):
             types.BufferedInputFile(video_bytes, filename=filename),
             caption=f"✅ Готово!\n{url}"
         )
-
         os.remove(filename)
 
     except Exception:
         await wait.edit_text("❌ Не удалось скачать.\nПопробуй другую ссылку.")
 
 
-# ==================== МЕНЮ ====================
+# ==================== КНОПКИ ====================
 
-@dp.callback_query(F.data == "menu_download")
-async def back_to_menu(callback: types.CallbackQuery):
-    await callback.message.edit_text("🎥 Отправь мне ссылку на видео.", reply_markup=main_menu())
+@dp.callback_query(F.data == "main")
+async def main_menu_handler(callback: types.CallbackQuery):
+    await callback.message.edit_text("🎥 Отправь ссылку на видео.", reply_markup=get_main_menu())
 
 
-@dp.callback_query(F.data == "menu_shazam")
-async def shazam_menu(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "shazam")
+async def shazam_handler(callback: types.CallbackQuery):
     await callback.message.edit_text(
-        "🎵 Отправь видео или ссылку — попробую найти музыку.",
-        reply_markup=main_menu()
+        "🎵 Отправь мне видео или ссылку — попробую найти трек.",
+        reply_markup=get_main_menu()
     )
 
 
-@dp.callback_query(F.data == "menu_donate")
-async def donate_menu(callback: types.CallbackQuery):
+@dp.callback_query(F.data == "donate")
+async def donate_handler(callback: types.CallbackQuery):
     builder = InlineKeyboardBuilder()
-    builder.button(text="⬅️ Назад в меню", callback_data="menu_download")
+    builder.button(text="⬅️ Назад", callback_data="main")
     
     await callback.message.edit_text(
         "❤️ Спасибо за поддержку!\n\n"
