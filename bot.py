@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram import F
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 import asyncio
 import yt_dlp
 import os
@@ -15,7 +16,17 @@ os.makedirs("downloads", exist_ok=True)
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer("🎥 Бот исправлен.\nКидай ссылку на TikTok или YouTube.")
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎵 Найти музыку", callback_data="shazam")
+    builder.button(text="❤️ Поддержать разработчика", callback_data="donate")
+    builder.adjust(1)
+
+    await message.answer(
+        "🎥 Бот готов!\n\n"
+        "Отправь ссылку на видео из TikTok, YouTube или Instagram.\n"
+        "Или используй кнопки:",
+        reply_markup=builder.as_markup()
+    )
 
 
 @dp.message(F.text)
@@ -35,28 +46,4 @@ async def download(message: types.Message):
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info)
-
-        # Правильный способ отправки видео в aiogram 3
-        with open(filename, 'rb') as f:
-            video_bytes = f.read()
-
-        await message.answer_video(
-            types.BufferedInputFile(video_bytes, filename=filename),
-            caption=f"✅ Готово!\n{url}"
-        )
-
-        os.remove(filename)
-
-    except Exception as e:
-        await wait.edit_text(f"❌ Ошибка: {str(e)[:150]}...\nПопробуй другую ссылку.")
-
-
-async def main():
-    print("🤖 Бот запущен (исправленная версия)")
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+            info = ydl.extract_info
