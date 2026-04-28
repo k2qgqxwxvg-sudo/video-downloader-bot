@@ -1,72 +1,81 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram import F
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import asyncio
 import os
+import json
 
 BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Виртуальный баланс
 user_balance = {}
 
 
 def get_main_keyboard():
-    kb = InlineKeyboardBuilder()
-    kb.button(text="🪙 Играть в Gem Hunter", callback_data="play_gemhunter")
-    kb.button(text="💰 Мой баланс", callback_data="balance")
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="🪙 Играть в Gem Hunter")
+    kb.button(text="💰 Мой баланс")
     kb.adjust(1)
-    return kb.as_markup()
+    return kb.as_markup(resize_keyboard=True, persistent=True)
 
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user_id = message.from_user.id
     if user_id not in user_balance:
-        user_balance[user_id] = 10000  # стартовые 10.000 монет
+        user_balance[user_id] = 10000
 
     await message.answer(
-        f"🪙 Добро пожаловать в **Gem Hunter**!\n\n"
-        f"Твой баланс: **{user_balance[user_id]:,}** монет\n\n"
-        "Ищи сокровища на поле и избегай бомб!",
+        f"🪙 **Gem Hunter**\n\n"
+        f"Баланс: **{user_balance[user_id]:,}** монет",
         reply_markup=get_main_keyboard()
     )
 
 
-@dp.callback_query(F.data == "play_gemhunter")
-async def play_gemhunter(callback: types.CallbackQuery):
-    await callback.message.edit_text(
-        "🪙 **Gem Hunter** запущен!\n\n"
-        "Сейчас откроется игровое поле.",
-        reply_markup=None
-    )
-    
-    await callback.message.answer(
-        "🎮 Запускаем поле с сокровищами...",
+@dp.message(F.text == "🪙 Играть в Gem Hunter")
+async def play_game(message: types.Message):
+    await message.answer(
+        "🎮 Запускаем Gem Hunter...",
         reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[[
             types.InlineKeyboardButton(
-                text="▶️ Открыть поле",
-                web_app=types.WebAppInfo(url="https://твой-домен.railway.app")  # позже заменим
+                text="▶️ Открыть игру",
+                web_app=types.WebAppInfo(url="https://твой-домен.railway.app")  # ← свой URL
             )
         ]])
     )
 
 
-@dp.callback_query(F.data == "balance")
-async def show_balance(callback: types.CallbackQuery):
-    user_id = callback.from_user.id
-    balance = user_balance.get(user_id, 10000)
-    await callback.message.edit_text(
-        f"💰 Твой баланс:\n\n**{balance:,}** монет",
-        reply_markup=get_main_keyboard()
-    )
+@dp.message(F.text == "💰 Мой баланс")
+async def show_balance(message: types.Message):
+    bal = user_balance.get(message.from_user.id, 10000)
+    await message.answer(f"💰 Твой баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
+
+
+# Получаем данные из WebApp
+@dp.message(F.web_app_data)
+async def web_app_data(message: types.Message):
+    try:
+        data = json.loads(message.web_app_data.data)
+        user_id = message.from_user.id
+        
+        if data.get('action') == 'win':
+            win_amount = int(data.get('amount', 0))
+            user_balance[user_id] = user_balance.get(user_id, 10000) + win_amount
+            
+            await message.answer(
+                f"💰 Выигрыш зачислен!\n"
+                f"+{win_amount:,} монет\n\n"
+                f"Новый баланс: **{user_balance[user_id]:,}** монет"
+            )
+    except:
+        pass
 
 
 async def main():
-    print("🪙 Gem Hunter бот запущен")
+    print("🪙 Gem Hunter запущен")
     await dp.start_polling(bot)
 
 
