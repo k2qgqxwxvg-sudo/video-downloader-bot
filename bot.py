@@ -25,10 +25,20 @@ async def download(message: types.Message):
     msg = await message.answer("⏳ Скачиваю видео...")
 
     try:
-        ydl_opts = {
+               ydl_opts = {
             'outtmpl': f'downloads/{message.from_user.id}_%(id)s.%(ext)s',
             'format': 'bestvideo+bestaudio/best',
             'noplaylist': True,
+            'quiet': True,
+            # Дополнительные настройки специально для Instagram и TikTok
+            'extractor_args': {
+                'instagram': {
+                    'player_url': True,
+                },
+            },
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
