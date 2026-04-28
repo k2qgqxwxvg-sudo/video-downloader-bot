@@ -15,7 +15,7 @@ os.makedirs("downloads", exist_ok=True)
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer("🎥 Бот готов.\nTikTok + Instagram\nКидай ссылку.")
+    await message.answer("🎥 Простой бот.\nОтправь ссылку на TikTok или YouTube.")
 
 
 @dp.message(F.text)
@@ -24,36 +24,30 @@ async def download(message: types.Message):
     if not url.startswith(("http", "https")):
         return await message.answer("❌ Это не ссылка.")
 
-    wait_msg = await message.answer("⏳ Скачиваю...")
+    wait = await message.answer("⏳ Скачиваю...")
 
     try:
         ydl_opts = {
             'outtmpl': f'downloads/{message.from_user.id}_%(id)s.%(ext)s',
-            'format': 'bestvideo+bestaudio/best',
+            'format': 'best',
             'noplaylist': True,
             'quiet': True,
-            'cookiefile': 'cookies.txt',   # если есть — используем
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            },
-            'retries': 15,
-            'fragment_retries': 10,
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
 
-        with open(filename, 'rb') as video:
+        with open(filename, 'rb') as f:
             await message.answer_video(
-                types.InputFile(video),
+                types.InputFile(f),
                 caption=f"✅ Готово!\n{url}"
             )
 
         os.remove(filename)
 
-    except Exception:
-        await wait_msg.edit_text("❌ Не скачалось.\nПопробуй другую ссылку.")
+    except Exception as e:
+        await wait.edit_text(f"❌ Ошибка: {str(e)[:200]}...\nПопробуй другую ссылку.")
 
 
 async def main():
