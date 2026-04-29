@@ -5,63 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gem Hunter</title>
   <style>
-    body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; padding:20px; }
+    body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; margin:0; padding:15px; }
     h1 { color:#22ff88; }
-    button { 
-      padding:18px 40px; 
-      font-size:20px; 
-      margin:20px; 
-      background:#22ff88; 
-      color:black; 
-      border:none; 
-      border-radius:15px; 
-      width:85%;
-    }
-    .grid { 
-      display:grid; 
-      grid-template-columns:repeat(5,1fr); 
-      gap:10px; 
-      max-width:340px; 
-      margin:30px auto; 
-    }
+    .controls { margin:15px 0; }
+    select, input, button { padding:12px; margin:5px; font-size:16px; border-radius:10px; }
+    button { background:#22ff88; color:black; border:none; padding:14px 28px; font-weight:bold; width:80%; }
+    .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:340px; margin:20px auto; }
     .cell { 
-      width:60px; 
-      height:60px; 
-      background:#1e1e2e; 
-      border-radius:12px; 
-      font-size:30px; 
-      display:flex; 
-      align-items:center; 
-      justify-content:center; 
-      cursor:pointer; 
+      width:62px; height:62px; background:#1e1e2e; border-radius:12px; 
+      font-size:32px; display:flex; align-items:center; justify-content:center; 
+      cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.6);
     }
+    .cell.opened { cursor:default; }
+    .gem { background:#22ff88 !important; animation:pop 0.3s; }
+    .bomb { background:#ff3366 !important; }
+    @keyframes pop { from{transform:scale(0.6);} to{transform:scale(1);} }
   </style>
 </head>
 <body>
   <h1>Gem Hunter</h1>
-  <p>Нажми кнопку ниже</p>
   
+  <div class="controls">
+    Мины: 
+    <select id="mines">
+      <option value="3">3</option>
+      <option value="5" selected>5</option>
+      <option value="7">7</option>
+      <option value="10">10</option>
+    </select>
+    Ставка: <input type="number" id="bet" value="500" style="width:90px">
+  </div>
+
   <button onclick="startGame()">Начать игру</button>
 
   <div class="grid" id="grid"></div>
 
+  <button onclick="cashOut()" id="cashout" style="display:none; background:#ffaa00; margin-top:15px;">
+    💰 Забрать выигрыш
+  </button>
+
   <script>
+    let grid = [], bombs = 5, bet = 500, opened = 0, gameOver = false;
+
     function startGame() {
-      alert("✅ Игра запущена!");
+      bombs = parseInt(document.getElementById('mines').value);
+      bet = parseInt(document.getElementById('bet').value) || 500;
 
-      const grid = document.getElementById('grid');
-      grid.innerHTML = '';
+      Telegram.WebApp.sendData(JSON.stringify({ action: "bet", amount: bet }));
 
+      gameOver = false;
+      opened = 0;
+
+      grid = Array(25).fill(0);
+      let placed = 0;
+      while (placed < bombs) {
+        let idx = Math.floor(Math.random() * 25);
+        if (grid[idx] === 0) {
+          grid[idx] = 1;
+          placed++;
+        }
+      }
+
+      const g = document.getElementById('grid');
+      g.innerHTML = '';
       for (let i = 0; i < 25; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         cell.textContent = '❓';
-        cell.onclick = function() {
-          this.textContent = '💎';
-          this.style.background = '#22ff88';
-        };
-        grid.appendChild(cell);
+        cell.dataset.index = i;
+        cell.onclick = () => openCell(i, cell);
+        g.appendChild(cell);
       }
+      document.getElementById('cashout').style.display = 'inline-block';
+    }
+
+    function openCell(i, cell) {
+      if (gameOver || cell.classList.contains('opened')) return;
+
+      cell.classList.add('opened');
+
+      if (grid[i] === 1) {
+        cell.textContent = '💥';
+        cell.style.background = '#ff3366';
+        gameOver = true;
+        setTimeout(() => alert('💥 Бомба! Вы проиграли.'), 300);
+      } else {
+        cell.textContent = '💎';
+        cell.style.background = '#22ff88';
+        opened++;
+      }
+    }
+
+    function cashOut() {
+      if (gameOver) return;
+      const win = Math.floor(bet * (1 + opened * 0.45));
+      
+      Telegram.WebApp.sendData(JSON.stringify({
+        action: "win",
+        amount: win
+      }));
+
+      alert(`💰 Вы выиграли ${win} монет!`);
+      document.getElementById('cashout').style.display = 'none';
     }
   </script>
 </body>
