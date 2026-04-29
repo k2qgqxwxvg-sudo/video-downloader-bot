@@ -5,28 +5,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gem Hunter</title>
   <style>
-    body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; margin:0; padding:15px; }
+    body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; padding:20px; }
     h1 { color:#22ff88; }
-    .controls { margin:15px 0; }
-    select, input, button { padding:12px; margin:5px; font-size:16px; border-radius:10px; }
-    button { background:#22ff88; color:black; border:none; padding:14px 28px; font-weight:bold; width:80%; }
-    .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:340px; margin:20px auto; }
-    .cell { 
-      width:62px; height:62px; background:#1e1e2e; border-radius:12px; 
-      font-size:32px; display:flex; align-items:center; justify-content:center; 
-      cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.6);
+    button { 
+      padding:18px 40px; 
+      font-size:20px; 
+      margin:20px; 
+      background:#22ff88; 
+      color:black; 
+      border:none; 
+      border-radius:15px; 
+      width:85%;
     }
-    .cell.opened { cursor:default; }
-    .gem { background:#22ff88 !important; animation:pop 0.3s; }
-    .bomb { background:#ff3366 !important; }
-    @keyframes pop { from{transform:scale(0.6);} to{transform:scale(1);} }
+    .grid { 
+      display:grid; 
+      grid-template-columns:repeat(5,1fr); 
+      gap:10px; 
+      max-width:340px; 
+      margin:30px auto; 
+    }
+    .cell { 
+      width:60px; 
+      height:60px; 
+      background:#1e1e2e; 
+      border-radius:12px; 
+      font-size:30px; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      cursor:pointer; 
+    }
   </style>
 </head>
 <body>
   <h1>Gem Hunter</h1>
+  <p>Нажми кнопку ниже</p>
   
-  <div class="controls">
-    Мины: 
-    <select id="mines">
-      <option value="3">3</option>
-      <option
+  <button onclick="startGame()">Начать игру</button>
+
+  <div class="grid" id="grid"></div>
+
+  <script>
+    function startGame() {
+      alert("✅ Игра запущена!");
+
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = '❓';
+        cell.onclick = function() {
+          this.textContent = '💎';
+          this.style.background = '#22ff88';
+        };
+        grid.appendChild(cell);
+      }
+    }
+  </script>
+</body>
+</html>
