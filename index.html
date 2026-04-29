@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gem Hunter</title>
   <style>
-    body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; margin:0; padding:15px; }
-    h1 { color:#22ff88; }
-    .controls { margin:15px 0; }
-    select, input, button { padding:12px; margin:5px; font-size:16px; border-radius:10px; }
-    button { background:#22ff88; color:black; border:none; padding:14px 28px; font-weight:bold; width:80%; }
-    .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:340px; margin:20px auto; }
+    body { background: #0a0a14; color: #fff; font-family: Arial; text-align: center; margin: 0; padding: 15px; }
+    h1 { color: #22ff88; }
+    .controls { margin: 15px 0; }
+    select, input, button { padding: 12px; margin: 5px; font-size: 16px; border-radius: 10px; }
+    button { background: #22ff88; color: black; border: none; padding: 14px 28px; font-weight: bold; width: 80%; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 340px; margin: 20px auto; }
     .cell { 
-      width:62px; height:62px; background:#1e1e2e; border-radius:12px; 
-      font-size:32px; display:flex; align-items:center; justify-content:center; 
-      cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.6);
+      width: 62px; height: 62px; background: #1e1e2e; border-radius: 12px; 
+      font-size: 32px; display: flex; align-items: center; justify-content: center; 
+      cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
     }
-    .cell.opened { cursor:default; }
-    .gem { background:#22ff88 !important; animation:pop 0.3s; }
-    .bomb { background:#ff3366 !important; }
-    @keyframes pop { from{transform:scale(0.6);} to{transform:scale(1);} }
+    .cell.opened { cursor: default; }
+    .gem { background: #22ff88 !important; }
+    .bomb { background: #ff3366 !important; }
   </style>
 </head>
 <body>
@@ -81,8 +80,8 @@
 
     function openCell(i, cell) {
       if (gameOver || cell.classList.contains('opened')) return;
-
       cell.classList.add('opened');
+      opened++;
 
       if (grid[i] === 1) {
         cell.textContent = '💥';
@@ -92,19 +91,13 @@
       } else {
         cell.textContent = '💎';
         cell.style.background = '#22ff88';
-        opened++;
       }
     }
 
     function cashOut() {
       if (gameOver) return;
       const win = Math.floor(bet * (1 + opened * 0.45));
-      
-      Telegram.WebApp.sendData(JSON.stringify({
-        action: "win",
-        amount: win
-      }));
-
+      Telegram.WebApp.sendData(JSON.stringify({ action: "win", amount: win }));
       alert(`💰 Вы выиграли ${win} монет!`);
       document.getElementById('cashout').style.display = 'none';
     }
