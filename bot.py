@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram import F
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import asyncio
+import json
 
 BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
 
@@ -28,14 +29,14 @@ async def start(message: types.Message):
 
     await message.answer(
         f"🪙 **Gem Hunter**\n\n"
-        f"Баланс: **{user_balance[user_id]:,}** монет\n\n"
-        "Готов искать сокровища?",
+        f"Баланс: **{user_balance[user_id]:,}** монет",
         reply_markup=get_main_keyboard()
     )
 
 
 @dp.message(F.text == "🪙 Играть в Gem Hunter")
 async def play_game(message: types.Message):
+    user_id = message.from_user.id
     await message.answer(
         "🎮 Открываем Gem Hunter...",
         reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[[
@@ -53,8 +54,31 @@ async def show_balance(message: types.Message):
     await message.answer(f"💰 Твой баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
 
 
+# Получаем данные из игры
+@dp.message(F.web_app_data)
+async def handle_webapp_data(message: types.Message):
+    try:
+        data = json.loads(message.web_app_data.data)
+        user_id = message.from_user.id
+
+        if data.get('action') == 'win':
+            amount = int(data.get('amount', 0))
+            user_balance[user_id] = user_balance.get(user_id, 10000) + amount
+            await message.answer(f"💰 Выигрыш зачислен!\n+{amount:,} монет\nНовый баланс: **{user_balance[user_id]:,}**")
+
+        elif data.get('action') == 'bet':
+            amount = int(data.get('amount', 0))
+            if user_balance.get(user_id, 10000) >= amount:
+                user_balance[user_id] -= amount
+                await message.answer(f"✅ Ставка {amount:,} списана.")
+            else:
+                await message.answer("❌ Недостаточно монет на балансе!")
+    except:
+        pass
+
+
 async def main():
-    print("🪙 Gem Hunter запущен")
+    print("🪙 Gem Hunter с рабочим балансом запущен")
     await dp.start_polling(bot)
 
 
