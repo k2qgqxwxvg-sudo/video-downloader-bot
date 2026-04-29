@@ -28,7 +28,8 @@ async def start(message: types.Message):
 
     await message.answer(
         f"🪙 **Gem Hunter**\n\n"
-        f"Баланс: **{user_balance[user_id]:,}** монет",
+        f"Баланс: **{user_balance[user_id]:,}** монет\n\n"
+        "Готов искать сокровища?",
         reply_markup=get_main_keyboard()
     )
 
@@ -40,7 +41,7 @@ async def play_game(message: types.Message):
         reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[[
             types.InlineKeyboardButton(
                 text="▶️ Запустить игру",
-                web_app=types.WebAppInfo(url="https://твой-url.railway.app")  # ← замени после деплоя
+                web_app=types.WebAppInfo(url="https://video-downloader-bot-rho.vercel.app")
             )
         ]])
     )
@@ -49,7 +50,7 @@ async def play_game(message: types.Message):
 @dp.message(F.text == "💰 Мой баланс")
 async def show_balance(message: types.Message):
     bal = user_balance.get(message.from_user.id, 10000)
-    await message.answer(f"💰 Баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
+    await message.answer(f"💰 Твой баланс: **{bal:,}** монет", reply_markup=get_main_keyboard())
 
 
 async def main():
