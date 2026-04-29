@@ -6,10 +6,10 @@
   <title>Gem Hunter</title>
   <style>
     body { background:#0a0a14; color:#fff; font-family:Arial; text-align:center; margin:0; padding:15px; }
-    h1 { color:#22ff88; }
+    h1 { color:#22ff88; margin:10px 0; }
     .controls { margin:15px 0; }
     select, input, button { padding:12px; margin:5px; font-size:16px; border-radius:10px; }
-    button { background:#22ff88; color:black; border:none; padding:14px 28px; font-weight:bold; }
+    button { background:#22ff88; color:black; border:none; padding:14px 28px; font-weight:bold; cursor:pointer; }
     .grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; max-width:340px; margin:20px auto; }
     .cell { 
       width:62px; height:62px; background:#1e1e2e; border-radius:12px; 
@@ -34,12 +34,13 @@
       <option value="10">10</option>
     </select>
     Ставка: <input type="number" id="bet" value="500" style="width:90px">
-    <button onclick="startGame()">Начать игру</button>
   </div>
+
+  <button onclick="startGame()" style="width:80%;">Начать игру</button>
 
   <div class="grid" id="grid"></div>
 
-  <button onclick="cashOut()" id="cashout" style="display:none; background:#ffaa00; margin-top:15px;">
+  <button onclick="cashOut()" id="cashout" style="display:none; background:#ffaa00; margin-top:15px; width:80%;">
     💰 Забрать выигрыш
   </button>
 
@@ -50,7 +51,6 @@
       bombs = parseInt(document.getElementById('mines').value);
       bet = parseInt(document.getElementById('bet').value) || 500;
 
-      // Отправляем ставку в бот
       Telegram.WebApp.sendData(JSON.stringify({ action: "bet", amount: bet }));
 
       gameOver = false;
@@ -80,4 +80,38 @@
     }
 
     function openCell(i, cell) {
-      if (gameOver || cell.classList
+      if (gameOver || cell.classList.contains('opened')) return;
+      
+      cell.classList.add('opened');
+      opened++;
+
+      if (grid[i] === 1) {
+        cell.classList.add('bomb');
+        cell.innerHTML = '💥';
+        gameOver = true;
+        setTimeout(() => alert('💥 Бомба! Вы проиграли.'), 300);
+      } else {
+        cell.classList.add('gem');
+        cell.innerHTML = '💎';
+        multiplier = (1 + opened * 0.45).toFixed(2);
+      }
+    }
+
+    function cashOut() {
+      if (gameOver) return;
+      const win = Math.floor(bet * multiplier);
+      
+      Telegram.WebApp.sendData(JSON.stringify({
+        action: "win",
+        amount: win
+      }));
+
+      alert(`💰 Вы выиграли ${win} монет!`);
+      document.getElementById('cashout').style.display = 'none';
+    }
+
+    // Автозапуск
+    window.onload = startGame;
+  </script>
+</body>
+</html>
