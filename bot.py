@@ -28,8 +28,7 @@ async def start(message: types.Message):
 
     await message.answer(
         f"🪙 **Gem Hunter**\n\n"
-        f"Баланс: **{user_balance[user_id]:,}** монет\n\n"
-        "Готов искать сокровища?",
+        f"Баланс: **{user_balance[user_id]:,}** монет",
         reply_markup=get_main_keyboard()
     )
 
@@ -41,7 +40,7 @@ async def play_game(message: types.Message):
         reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[[
             types.InlineKeyboardButton(
                 text="▶️ Запустить игру",
-                web_app=types.WebAppInfo(url="https://твой-url.railway.app")  # ← замени на свой
+                web_app=types.WebAppInfo(url="https://твой-url.railway.app")  # ← замени после деплоя
             )
         ]])
     )
