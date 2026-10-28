@@ -3,8 +3,11 @@ from aiogram.filters import Command
 from aiogram import F
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 import asyncio
+import os
 
-BOT_TOKEN = "8114296420:AAEu10IU5EE7bcXlsRgaG16LATGELVwxkXM"
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+if not BOT_TOKEN:
+    raise ValueError("BOT_TOKEN environment variable is required")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -54,7 +57,7 @@ async def show_balance(message: types.Message):
 
 
 async def main():
-    print("🪙 Gem Hunter запущен (без подписки)")
+    print("🪙 Gem Hunter запущен")
     await dp.start_polling(bot)
 
 
